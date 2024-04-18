@@ -74,7 +74,7 @@ Here is an example using the cli arguments
 python crawler.py --url "https://my-website-to-crawl/" --output "custom_output" --summary_file "detailed_summary.json" --progress --clean --max-links 50
 ```
 
---url "https://docs.motar.io/": This sets the starting URL for the crawler to the specified website.
+--url "https://my-example-site": This sets the starting URL for the crawler to the specified website.
 
 --output "custom_output": This directs the script to save all crawled HTML files in a directory named "custom_output".
 
