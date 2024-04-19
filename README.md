@@ -35,7 +35,7 @@ pip install -r requirements.txt
 
 If you have issues or conflicts with packages try creating a virtual environment with conda or simlar.  Virtual environments isolate the packages for this project from your current python packages and set up.
 
-(conda)[https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation]
+[conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation)
 
 Then at the command line run this command:
 ```bash
