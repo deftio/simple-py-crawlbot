@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# an opensource python web crawler
+# see https://github.com/deftio/simple-py-crawlbot
+
 import os
 import json
 import argparse
@@ -31,18 +34,18 @@ def save_html(content, filename):
 def clean_html(soup):
     for element in soup(["script", "style", "link"]):
         element.decompose()
-    for comment in soup.findAll(text=lambda text: isinstance(text, Comment)):
+    for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
         comment.extract()
     return soup
 
-def extract_content(driver, url, output_folder, clean_content):
+def extract_content(driver, url, output_dir, clean_content):
     try:
         driver.get(url)
         time.sleep(2)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         title = soup.title.string if soup.title else 'No_Title'
         filename = f"{title.replace(' ', '_').replace('/', '_')}.html"
-        filepath = os.path.join(output_folder, filename)
+        filepath = os.path.join(output_dir, filename)
 
         if clean_content:
             soup = clean_html(soup)
@@ -66,7 +69,7 @@ def get_links(soup, base_url):
             links.add(full_url)
     return links
 
-def crawl_site(start_url, output_folder, show_progress, clean_content, max_links):
+def crawl_site(start_url, output_dir, show_progress, clean_content, max_links):
     driver = setup_browser()
     visited = set()
     to_visit = {normalize_url(start_url, start_url)}
@@ -77,7 +80,7 @@ def crawl_site(start_url, output_folder, show_progress, clean_content, max_links
         if current_url in visited:
             continue
         visited.add(current_url)
-        page_info, new_links = extract_content(driver, current_url, output_folder, clean_content)
+        page_info, new_links = extract_content(driver, current_url, output_dir, clean_content)
         if page_info:
             all_pages.append(page_info)
         to_visit.update(new_links - visited)
@@ -90,23 +93,27 @@ def crawl_site(start_url, output_folder, show_progress, clean_content, max_links
 def main():
     parser = argparse.ArgumentParser(description="Web Crawler for Internal Documentation Site")
     parser.add_argument('--url', required=True, help="The starting URL for the crawler")
-    parser.add_argument('--output', default='output', help="Folder where the HTML files will be stored")
+    parser.add_argument('--output_dir', default='output', help="Directory where the HTML files will be stored")
     parser.add_argument('--summary_file', default='summary.json', help="Filename for the JSON summary")
     parser.add_argument('--progress', action='store_true', help="Show progress during crawling")
     parser.add_argument('--clean', action='store_true', help="Remove non-informational content from HTML")
-    parser.add_argument('--max-links', type=int, help="Maximum number of links to crawl, crawls entire site if omitted")
+    parser.add_argument('--max_links', type=int, help="Maximum number of links to crawl, crawls entire site if omitted")
     args = parser.parse_args()
 
-    crawled_pages = crawl_site(args.url, args.output, args.progress, args.clean, args.max_links)
+    # Ensure the output directory exists
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+
+    crawled_pages = crawl_site(args.url, args.output_dir, args.progress, args.clean, args.max_links)
     
     # Create JSON summary
     summary = {
         'total_links': len(crawled_pages),
         'pages': crawled_pages,
-        'output_directory': os.path.abspath(args.output)
+        'output_directory': os.path.abspath(args.output_dir)
     }
     
-    summary_path = os.path.join(args.output, args.summary_file)
+    summary_path = os.path.join(args.output_dir, args.summary_file)
     with open(summary_path, 'w') as json_file:
         json.dump(summary, json_file, indent=4)
 

@@ -37,7 +37,7 @@ If you have issues or conflicts with packages try creating a virtual environment
 
 [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation)
 
-Then at the command line run this command:
+Then at the command line run this command such as :
 ```bash
 conda create -n simple-py-crawlbot python=3.10
 conda activate simple-py-crawlbot
@@ -55,11 +55,11 @@ The crawler takes several cli (command line interface) arguments:
 --url: Required. Specifies the starting URL for the crawler.
 Example: --url "https://my-website-to-crawl/"
 
---output: Specifies the directory where the HTML files will be stored. Default is "output".
-Example: --output custom_directory
+--output-dir: Specifies the directory where the HTML files will be stored. Default is "output".
+Example: --output_dir custom_directory
 
---summary_file: Specifies the filename for the JSON summary. Default is "summary.json".
-Example: --summary_file custom_summary.json
+--summary: Specifies the filename for the JSON summary. Default is "summary.json".
+Example: --summary custom_summary.json
 
 --progress: Enables progress display during the crawling process. This is a flag; include it to activate.
 Example: --progress
@@ -67,8 +67,8 @@ Example: --progress
 --clean: Removes non-informational content (such as scripts and styles) from the HTML files. This is a flag; include it to activate.
 Example: --clean
 
---max-links: Limits the number of links to crawl. If omitted, the crawler processes the entire site.
-Example: --max-links 100
+--max_links: Limits the number of links to crawl. If omitted, the crawler processes the entire site.
+Example: --max_links 100
 
 
 Each CLI argument can be used in combination to fine-tune the behavior of the crawler based on the needs of the user. You can customize the input parameters to control various aspects like the extent of crawling, output customization, and content processing.
@@ -76,20 +76,20 @@ Each CLI argument can be used in combination to fine-tune the behavior of the cr
 ### Example 
 Here is an example using the cli arguments
 ```bash
-python crawler.py --url "https://my-website-to-crawl/" --output "output_pages" --summary_file "detailed_summary.json" --progress --clean --max-links 50
+python crawler.py --url https://my-website-to-crawl.com --output output_pages --summary_file detailed_summary.json --progress --clean --max_links 50
 ```
 
---url "https://my-website-to-crawl": This sets the starting URL for the crawler to the specified website.
+--url https://my-website-to-crawl.com: This sets the starting URL for the crawler to the specified website.
 
---output "output_pages": This directs the script to save all crawled HTML files in a directory named "output_pages".
+--output_dir output_pages: This directs the script to save all crawled HTML files in a directory named output_pages.
 
---summary_file "detailed_summary.json": Specifies that the JSON summary of the crawl should be saved with the filename "detailed_summary.json".
+--summary detailed_summary.json: Specifies that the JSON summary of the crawl should be saved with the filename detailed_summary.json.
 
 --progress: Includes a progress flag that enables real-time output showing the progress of the crawl, indicating how many links have been saved and what the current URL being processed is.
 
 --clean: Activates the cleaning function, which will strip non-essential content such as scripts and CSS from the HTML files to focus only on the informational content.
 
---max-links 50: Limits the crawler to processing a maximum of 50 links from the website, which is useful for keeping the scope of the crawl manageable or for testing purposes.  (if left out it will attempt to crawl the whole site)
+--max_links 50: Limits the crawler to processing a maximum of 50 links from the website, which is useful for keeping the scope of the crawl manageable or for testing purposes.  (if left out it will attempt to crawl the whole site)
 
 ## LICENSE
 BSD-2
