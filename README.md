@@ -6,10 +6,10 @@ This is a simple python web crawler which attempts to crawl all the pages of a g
 
 It captures each page's HTML content, saves it locally, and provides a JSON summary of the crawled pages. The tool is intended for use in testing and validating site content and structure.
 
-### note:
+### Note:
 This is meant to be a simple crawler - if the site you wish to crawl has complex javascript it may not work.  Also please be responsible in crawling sites as it can take much site bandwidth and respect appropriate copyrights and other information.  
 
-The crawler is not designed and will not attempt to handle logins or firewalls.
+The crawler will not attempt to handle logins or firewalls.
 
 ## Features
 
@@ -22,7 +22,7 @@ The crawler is not designed and will not attempt to handle logins or firewalls.
 
 Before you run the web crawler, you must install the following:
 
-- Python 3.9 or newer
+- Python 3.9 or newer (technically 3.6 should work but some of the deps may soon no longer be supported)
 - Selenium
 - BeautifulSoup4
 - ChromeDriver (make sure it matches your Chrome version and is placed in your PATH)
@@ -40,12 +40,17 @@ If you have issues or conflicts with packages try creating a virtual environment
 Then at the command line run this command:
 ```bash
 conda create -n simple-py-crawlbot python=3.10
-conda activate simplye-py-crawlbot
+conda activate simple-py-crawlbot
+```
+use this to deactivate the virtual env:
+
+```bash
+conda deactivate
 ```
 
 ## Usage
 
-The crawler takes several cli arguments:
+The crawler takes several cli (command line interface) arguments:
 
 --url: Required. Specifies the starting URL for the crawler.
 Example: --url "https://my-website-to-crawl/"
@@ -71,12 +76,12 @@ Each CLI argument can be used in combination to fine-tune the behavior of the cr
 ### Example 
 Here is an example using the cli arguments
 ```bash
-python crawler.py --url "https://my-website-to-crawl/" --output "custom_output" --summary_file "detailed_summary.json" --progress --clean --max-links 50
+python crawler.py --url "https://my-website-to-crawl/" --output "output_pages" --summary_file "detailed_summary.json" --progress --clean --max-links 50
 ```
 
---url "https://my-example-site": This sets the starting URL for the crawler to the specified website.
+--url "https://my-website-to-crawl": This sets the starting URL for the crawler to the specified website.
 
---output "custom_output": This directs the script to save all crawled HTML files in a directory named "custom_output".
+--output "output_pages": This directs the script to save all crawled HTML files in a directory named "output_pages".
 
 --summary_file "detailed_summary.json": Specifies that the JSON summary of the crawl should be saved with the filename "detailed_summary.json".
 
@@ -84,7 +89,7 @@ python crawler.py --url "https://my-website-to-crawl/" --output "custom_output" 
 
 --clean: Activates the cleaning function, which will strip non-essential content such as scripts and CSS from the HTML files to focus only on the informational content.
 
---max-links 50: Limits the crawler to processing a maximum of 50 links from the website, which is useful for keeping the scope of the crawl manageable or for testing purposes.
+--max-links 50: Limits the crawler to processing a maximum of 50 links from the website, which is useful for keeping the scope of the crawl manageable or for testing purposes.  (if left out it will attempt to crawl the whole site)
 
 ## LICENSE
 BSD-2
