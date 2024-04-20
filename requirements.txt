@@ -10,3 +10,4 @@ pdfkit==1.0.0
 PyPDF2==1.26.0
 markdown2==2.4.1
 reportlab==4.2.0
+weasyprint==61.2
