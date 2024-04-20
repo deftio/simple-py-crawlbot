@@ -1,23 +1,18 @@
-#!/usr/bin/env python3
-# merge-docs-into-pdf.py - Concatenate various file types into a single PDF file
-# Usage: merge-docs-into-pdf.py -d <directory> -o <output_pdf>
-
 import os
 import argparse
-import pdfkit
+from weasyprint import HTML
 from PyPDF2 import PdfFileMerger
 from markdown2 import markdown
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import yaml
-from pdfkit.api import Configuration
 
 def convert_html_to_pdf(source_html, output_filename):
-    pdfkit.from_file(source_html, output_filename)
+    HTML(source_html).write_pdf(output_filename)
 
 def convert_markdown_to_pdf(markdown_text, output_filename):
     html_text = markdown(markdown_text)
-    pdfkit.from_string(html_text, output_filename)
+    HTML(string=html_text).write_pdf(output_filename)
 
 def convert_text_to_pdf(text, output_filename):
     c = canvas.Canvas(output_filename, pagesize=letter)
@@ -46,7 +41,7 @@ def convert_files_to_pdf(directory, final_pdf):
         filepath = os.path.join(directory, filename)
         temp_pdf_path = os.path.join(directory, 'temp_' + os.path.splitext(filename)[0] + '.pdf')
         if filename.endswith('.html'):
-            convert_html_to_pdf(filepath, temp_pdf_path)
+            convert_html_to_pdf('file://' + os.path.abspath(filepath), temp_pdf_path)
         elif filename.endswith('.md'):
             with open(filepath, 'r') as file:
                 markdown_content = file.read()
@@ -70,7 +65,7 @@ def convert_files_to_pdf(directory, final_pdf):
             os.remove(pdf)
 
 def main():
-    parser = argparse.ArgumentParser(description='Concatenate various file types into a single PDF file.')
+    parser = argparse.ArgumentParser(description='Concatenate various file types into a single PDF file using WeasyPrint.')
     parser.add_argument('-d', '--directory', type=str, help='Directory containing the files to process')
     parser.add_argument('-o', '--output', type=str, help='Output PDF file name')
     

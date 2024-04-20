@@ -86,8 +86,8 @@ def process_html_files(input_dir, output_dir):
 
 def main():
     parser = argparse.ArgumentParser(description="Convert HTML files to structured YAML preserving cleaned text.")
-    parser.add_argument('input_dir', help="Directory containing HTML files to process.")
-    parser.add_argument('output_dir', help="Directory where YAML files will be stored.")
+    parser.add_argument('-input_dir', help="Directory containing HTML files to process.")
+    parser.add_argument('-output_dir', help="Directory where YAML files will be stored.")
     args = parser.parse_args()
     process_html_files(args.input_dir, args.output_dir)
 
