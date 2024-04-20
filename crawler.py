@@ -11,6 +11,8 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup, Comment
 import time
 
+#from webdriver_manager.chrome import ChromeDriverManager
+
 def setup_browser():
     options = Options()
     options.add_argument('--headless')  # Run in headless mode
