@@ -92,13 +92,20 @@ python crawler.py --url https://my-website-to-crawl.com --output output_pages --
 --clean: Activates the cleaning function, which will strip non-essential content such as scripts and CSS from the HTML files to focus only on the informational content.
 
 --max_links 50: Limits the crawler to processing a maximum of 50 links from the website, which is useful for keeping the scope of the crawl manageable or for testing purposes.  (if left out it will attempt to crawl the whole site)
-
-## Using Clean and Strip
-The script clean_and_script.py is a cli program which takes a directory of html files (such as output from the crawler.py script) and outputs a yaml file for each intput html file which as just the text (no css or styles or html attributes) from the source directory.
+ 
+## Clean and Strip (clean_and_strip.py cli utility)
+The script clean_and_script.py is a cli program which takes a directory of html files (such as output from the crawler.py script) and outputs a yaml file for each intput html file which has just the text (no css or styles or html attributes) from the source directory.  Files are stored in yaml format but are human readable.
 
 Usage is as follows:
 ```bash
-clean_and_strip input_directory_of_crawled_files output_directory_of_extracted_text
+clean-and-strip -input_dir input_directory_of_crawled_files  -output_dir output_directory_of_extracted_text
+```
+
+## YAML-to-json.py
+Also included is yaml-to-json.py which can take a directory of yaml files and convert to json.  Can be used with clean_and_strip.py above
+
+```bash 
+yaml-to-json.py -input_dir input_directory_of_crawled_files  -output_dir output_directory_of_extracted_text
 ```
 
 
