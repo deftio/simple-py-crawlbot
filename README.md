@@ -6,6 +6,8 @@ This is a simple python web crawler which attempts to crawl all the pages of a g
 
 It captures each page's HTML content, saves it locally, and provides a JSON summary of the crawled pages. The tool is intended for use in testing and validating site content and structure.
 
+📚 **[Comprehensive documentation available in the docs folder](/docs/user-guide.md)**
+
 ### Note:
 This is meant to be a simple crawler - if the site you wish to crawl has complex javascript it may not work.  Also please be responsible in crawling sites as it can take much site bandwidth and respect appropriate copyrights and other information.  
 
@@ -17,6 +19,12 @@ The crawler will not attempt to handle logins or firewalls.
 - **Duplicate Handling**: Normalizes URLs to avoid processing and storing duplicate content.
 - **Local Storage**: Saves each page as a static HTML file.
 - **JSON Summary**: Generates a summary of all processed pages, including titles, file paths, and URLs.
+- **Web Interface**: Browser-based GUI for the crawler (crawler-gui.py).
+- **Content Extraction**: Clean and extract structured text from HTML files (clean-and-strip.py).
+- **Format Conversion**: Convert between YAML and JSON formats (yaml-to-json.py).
+- **PDF Generation**: Merge multiple document types into a single PDF (merge-docs-into-pdf.py).
+
+For detailed documentation on all features, see the [documentation folder](/docs/).
 
 ## Prerequisites & Installation
 
@@ -108,6 +116,68 @@ Also included is yaml-to-json.py which can take a directory of yaml files and co
 yaml-to-json.py -input_dir input_directory_of_crawled_files  -output_dir output_directory_of_extracted_text
 ```
 
+## Document Merging Tool (Create PDFs)
+
+The `merge-docs-into-pdf.py` script allows you to combine multiple documents of different formats into a single PDF file. This tool supports the following file formats:
+- HTML (.html)
+- Markdown (.md) 
+- Text (.txt)
+- YAML (.yaml)
+- PDF (.pdf)
+
+### Prerequisites
+
+Skip the package installation if you have already used pip to install requirments for the crawler.py
+
+Install the required Python packages:
+
+```bash
+pip install weasyprint PyPDF2 markdown2 reportlab pyyaml
+```
+or 
+```bash
+pip install -r requirments.txt
+```
+
+### Usage
+
+Run the script using the following command:
+
+```bash
+python merge-docs-into-pdf.py -d <directory> -o <output.pdf> [--no-merge]
+```
+
+Arguments:
+- `-d, --directory`: Directory containing the files to merge
+- `-o, --output`: Name of the output PDF file or directory (when using --no-merge)
+- `--no-merge`: Optional flag to create separate PDFs instead of merging into one
+
+### Examples
+
+Merge all files into a single PDF:
+```bash
+python merge-docs-into-pdf.py -d docs/ -o combined_documentation.pdf
+```
+
+Create separate PDFs for each file:
+```bash
+python merge-docs-into-pdf.py -d docs/ -o separate_pdfs/ --no-merge
+```
+
+This will:
+1. Scan the specified directory for supported files
+2. Convert each file to PDF format
+3. Either:
+   - Merge all PDFs into a single output file (default behavior)
+   - Create separate PDFs in the output directory (when using --no-merge)
+4. Clean up temporary files automatically
+
+### Notes
+- Files are processed in alphabetical order
+- Existing PDF files in the directory will be included
+- Unsupported file types are automatically skipped
+- The script preserves the formatting of the original documents
+- When using --no-merge, the output filename becomes the directory name where individual PDFs are saved
 
 ## LICENSE
 BSD-2

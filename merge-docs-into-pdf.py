@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import argparse
 from weasyprint import HTML
@@ -65,16 +67,43 @@ def convert_files_to_pdf(directory, final_pdf):
             os.remove(pdf)
 
 def main():
-    parser = argparse.ArgumentParser(description='Concatenate various file types into a single PDF file using WeasyPrint.')
+    parser = argparse.ArgumentParser(description='Concatenate various file types into a single PDF file.')
     parser.add_argument('-d', '--directory', type=str, help='Directory containing the files to process')
     parser.add_argument('-o', '--output', type=str, help='Output PDF file name')
+    parser.add_argument('--no-merge', action='store_true', help='Create separate PDFs instead of merging')
     
     args = parser.parse_args()
 
     if not args.directory or not args.output:
         parser.print_help()
     else:
-        convert_files_to_pdf(args.directory, args.output)
+        if args.no_merge:
+            output_dir = os.path.splitext(args.output)[0]
+            os.makedirs(output_dir, exist_ok=True)
+            for filename in os.listdir(args.directory):
+                if not filename.endswith(('.html', '.md', '.txt', '.yaml', '.pdf')):
+                    continue
+                filepath = os.path.join(args.directory, filename)
+                output_pdf = os.path.join(output_dir, os.path.splitext(filename)[0] + '.pdf')
+                
+                if filename.endswith('.html'):
+                    convert_html_to_pdf('file://' + os.path.abspath(filepath), output_pdf)
+                elif filename.endswith('.md'):
+                    with open(filepath, 'r') as file:
+                        markdown_content = file.read()
+                    convert_markdown_to_pdf(markdown_content, output_pdf)
+                elif filename.endswith('.txt') or filename.endswith('.yaml'):
+                    with open(filepath, 'r') as file:
+                        text_content = file.read()
+                    if filename.endswith('.yaml'):
+                        convert_yaml_to_pdf(yaml.safe_load(text_content), output_pdf)
+                    else:
+                        convert_text_to_pdf(text_content, output_pdf)
+                elif filename.endswith('.pdf'):
+                    from shutil import copyfile
+                    copyfile(filepath, output_pdf)
+        else:
+            convert_files_to_pdf(args.directory, args.output)
 
 if __name__ == '__main__':
     main()

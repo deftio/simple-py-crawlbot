@@ -16,3 +16,4 @@ weasyprint==61.2
 fastapi 
 uvicorn 
 aiohttp
+
