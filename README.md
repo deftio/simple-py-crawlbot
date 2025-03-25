@@ -2,14 +2,22 @@
 
 ## Overview
 
-This is a simple python web crawler which attempts to crawl all the pages of a given url using beautiful soup library and selenium.
+This is a collection of Python tools for web crawling, content extraction, and document processing. The main tools include:
 
-It captures each page's HTML content, saves it locally, and provides a JSON summary of the crawled pages. The tool is intended for use in testing and validating site content and structure.
+GUI/API version
+- **SPyCrawl**: A web-based interface for crawling websites and processing documents and api
+
+Separate Command Line Tools
+- **crawler.py**: A command-line web crawler using BeautifulSoup and Selenium
+- **clean-and-strip.py**: Tools for cleaning HTML and converting between formats
+- **merge-docs-into-pdf**: Tools for merging multiple document types into PDFs (or separately)
+
+Each tool captures HTML content, saves it locally, and provides various output formats. These tools are intended for testing and validating site content and structure.
 
 📚 **[Comprehensive documentation available in the docs folder](/docs/user-guide.md)**
 
 ### Note:
-This is meant to be a simple crawler - if the site you wish to crawl has complex javascript it may not work.  Also please be responsible in crawling sites as it can take much site bandwidth and respect appropriate copyrights and other information.  
+These tools are meant to be simple - if the site you wish to crawl has complex javascript it may not work. Also please be responsible in crawling sites as it can take much site bandwidth and respect appropriate copyrights and other information.  
 
 The crawler will not attempt to handle logins or firewalls.
 
@@ -19,7 +27,7 @@ The crawler will not attempt to handle logins or firewalls.
 - **Duplicate Handling**: Normalizes URLs to avoid processing and storing duplicate content.
 - **Local Storage**: Saves each page as a static HTML file.
 - **JSON Summary**: Generates a summary of all processed pages, including titles, file paths, and URLs.
-- **Web Interface**: Browser-based GUI for the crawler (crawler-gui.py).
+- **Web Interface**: Browser-based GUI for the crawler (spycrawl.py).
 - **Content Extraction**: Clean and extract structured text from HTML files (clean-and-strip.py).
 - **Format Conversion**: Convert between YAML and JSON formats (yaml-to-json.py).
 - **PDF Generation**: Merge multiple document types into a single PDF (merge-docs-into-pdf.py).
@@ -60,6 +68,22 @@ conda deactivate
 
 ## Usage
 
+### SPyCrawl Web Interface
+The easiest way to use the crawler is through the SPyCrawl web interface:
+
+```bash
+python spycrawl.py
+```
+
+Then open your browser to http://127.0.0.1:8803
+
+This interface provides a user-friendly way to:
+- Crawl websites
+- Clean HTML content
+- Convert between YAML and JSON formats
+- Generate PDFs from multiple document types
+
+### Simple Crawler CLI (stand alone command line crawler)
 The crawler takes several cli (command line interface) arguments:
 
 --url: Required. Specifies the starting URL for the crawler.
@@ -79,7 +103,6 @@ Example: --clean
 
 --max_links: Limits the number of links to crawl. If omitted, the crawler processes the entire site.
 Example: --max_links 100
-
 
 Each CLI argument can be used in combination to fine-tune the behavior of the crawler based on the needs of the user. You can customize the input parameters to control various aspects like the extent of crawling, output customization, and content processing.
 

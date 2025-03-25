@@ -1,19 +1,32 @@
-# this is for the crawler
-selenium==4.19
+# Core dependencies for all tools
+selenium==4.16.0
 beautifulsoup4==4.11.1
-chromedriver-autoinstaller==0.3.1
 pyyaml==6.0.1
 webdriver-manager==4.0.1
+requests==2.31.0
+lxml==5.1.0
 
-# this is for the pdf generation
+# PDF generation dependencies
 pdfkit==1.0.0
 PyPDF2==1.26.0
 markdown2==2.4.1
 reportlab==4.2.0
 weasyprint==61.2
+pycairo>=1.21.0  # Required by WeasyPrint
+cffi>=1.15.0     # Required by WeasyPrint
+html5lib>=1.1    # Required by WeasyPrint
+tinycss2>=1.2.1  # Required by WeasyPrint
+cssselect2>=0.7.0  # Required by WeasyPrint
+Pyphen>=0.13.2   # Required by WeasyPrint
 
-# this for web version
-fastapi 
-uvicorn 
-aiohttp
+# Web interface dependencies (SPyCrawl)
+fastapi>=0.95.0
+uvicorn[standard]>=0.20.0
+aiohttp==3.9.3
+python-multipart==0.0.9
+pydantic>=2.0.0
+sqlalchemy>=1.4.23
+
+# Additional utilities
+typing-extensions==4.9.0  # For better type hints
 
