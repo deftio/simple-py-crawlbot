@@ -131,12 +131,13 @@ class CrawlJob(Base):
     id = Column(String, primary_key=True)
     start_url = Column(String, nullable=False)
     timestamp = Column(DateTime, nullable=False)
-    status = Column(String, nullable=False)  # pending, running, completed, failed
+    status = Column(String, nullable=False)  # pending, running, completed, failed, stopped
     output_dir = Column(String)
     total_pages = Column(Integer, default=0)
     total_bytes = Column(Integer, default=0)
     error_message = Column(String)
     pages = Column(JSON)  # Store pages as JSON
+    current_url = Column(String)  # Track current URL being crawled
     
     def to_dict(self):
         return {
@@ -148,7 +149,8 @@ class CrawlJob(Base):
             "total_pages": self.total_pages,
             "total_bytes": self.total_bytes,
             "error_message": self.error_message,
-            "pages": self.pages or []
+            "pages": self.pages or [],
+            "current_url": self.current_url
         }
 
 # Create tables
@@ -157,6 +159,7 @@ Base.metadata.create_all(engine)
 class CrawlManager:
     def __init__(self):
         self.db = SessionLocal()
+        self.active_crawls = {}  # Track active crawls by session ID
         
     def create_session(self, url: str) -> CrawlJob:
         job = CrawlJob(
@@ -179,6 +182,14 @@ class CrawlManager:
         
     def update_session(self, job: CrawlJob):
         self.db.commit()
+
+    def stop_session(self, session_id: str) -> bool:
+        job = self.get_session(session_id)
+        if job and job.status == "running":
+            job.status = "stopped"
+            self.update_session(job)
+            return True
+        return False
 
     def clear_all_sessions(self):
         jobs = self.db.query(CrawlJob).all()
@@ -304,7 +315,7 @@ def get_links(soup, base_url):
             links.add(full_url)
     return links
 
-def crawl_site(start_url, output_dir, show_progress, clean_content, max_links):
+def crawl_site(start_url, output_dir, show_progress, clean_content, max_links, session_id):
     """Crawl a website starting from the given URL"""
     try:
         logger.info(f"Starting crawl of {start_url}")
@@ -322,6 +333,17 @@ def crawl_site(start_url, output_dir, show_progress, clean_content, max_links):
             visited = set()
             
             while queue and (max_links is None or total_links < max_links):
+                # Check if crawl has been stopped
+                job = crawl_manager.get_session(session_id)
+                if job and job.status == "stopped":
+                    logger.info(f"Crawl stopped by user. Processed {total_links} pages.")
+                    return {
+                        "total_links": total_links,
+                        "pages": crawled_pages,
+                        "output_directory": output_dir,
+                        "session_id": session_id
+                    }
+                
                 current_url = queue.pop(0)
                 if current_url in visited:
                     continue
@@ -331,6 +353,12 @@ def crawl_site(start_url, output_dir, show_progress, clean_content, max_links):
                 
                 try:
                     logger.info(f"Processing URL {total_links}: {current_url}")
+                    # Update current URL in database
+                    job = crawl_manager.get_session(session_id)
+                    if job:
+                        job.current_url = current_url
+                        crawl_manager.update_session(job)
+                    
                     # Extract content and get new links
                     page_info = extract_content(driver, current_url, output_dir, clean_content)
                     if page_info:
@@ -342,8 +370,10 @@ def crawl_site(start_url, output_dir, show_progress, clean_content, max_links):
                         logger.debug(f"Found {len(new_links)} new links on {current_url}")
                         
                         # Add new links to queue if we haven't reached max_links
-                        if max_links is None or total_links + len(new_links) <= max_links:
-                            queue.extend([link for link in new_links if link not in visited])
+                        if max_links is None or total_links < max_links:
+                            for link in new_links:
+                                if link not in visited and link not in queue:
+                                    queue.append(link)
                 
                 except Exception as e:
                     logger.error(f"Error processing {current_url}: {str(e)}")
@@ -353,7 +383,8 @@ def crawl_site(start_url, output_dir, show_progress, clean_content, max_links):
         return {
             "total_links": total_links,
             "pages": crawled_pages,
-            "output_directory": output_dir
+            "output_directory": output_dir,
+            "session_id": session_id
         }
         
     except Exception as e:
@@ -410,7 +441,8 @@ async def crawl(crawl_request: CrawlRequest):
                 crawl_request.output_dir,
                 crawl_request.show_progress,
                 crawl_request.clean_content,
-                crawl_request.max_links
+                crawl_request.max_links,
+                session.id
             )
             
             # Update session with results
@@ -520,6 +552,16 @@ async def clear_crawls():
             status_code=500,
             detail=f"Failed to clear crawl sessions: {str(e)}"
         )
+
+@app.post("/api/crawls/{session_id}/stop")
+async def stop_crawl(session_id: str):
+    """Stop a running crawl job"""
+    if crawl_manager.stop_session(session_id):
+        return {"message": "Crawl stopped successfully"}
+    raise HTTPException(
+        status_code=404,
+        detail="Crawl job not found or not running"
+    )
 
 if __name__ == "__main__":
     logger.info("Starting SPYCrawl server...")
