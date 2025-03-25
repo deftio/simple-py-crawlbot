@@ -17,8 +17,8 @@ Simple-Py-Crawlbot consists of several complementary tools:
 
 1. **crawler.py** - Command-line web crawler
 2. **crawler-gui.py** - Web interface for the crawler
-3. **clean-and-strip.py** - HTML content extractor and cleaner
-4. **yaml-to-json.py** - Format converter
-5. **merge-docs-into-pdf.py** - PDF converter and merger
+3. **clean_and_strip.py** - HTML content extractor and cleaner
+4. **yaml_to_json.py** - Format converter
+5. **merge_docs_into_pdf.py** - PDF converter and merger
 
 These tools can be used independently or combined in a workflow to crawl websites, extract content, or generate documentation.

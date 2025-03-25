@@ -9,8 +9,8 @@ GUI/API version
 
 Separate Command Line Tools
 - **crawler.py**: A command-line web crawler using BeautifulSoup and Selenium
-- **clean-and-strip.py**: Tools for cleaning HTML and converting between formats
-- **merge-docs-into-pdf**: Tools for merging multiple document types into PDFs (or separately)
+- **clean_and_strip.py**: Tools for cleaning HTML and converting between formats
+- **merge_docs_into_pdf.py**: Tools for merging multiple document types into PDFs (or separately)
 
 Each tool captures HTML content, saves it locally, and provides various output formats. These tools are intended for testing and validating site content and structure.
 
@@ -28,9 +28,9 @@ The crawler will not attempt to handle logins or firewalls.
 - **Local Storage**: Saves each page as a static HTML file.
 - **JSON Summary**: Generates a summary of all processed pages, including titles, file paths, and URLs.
 - **Web Interface**: Browser-based GUI for the crawler (spycrawl.py).
-- **Content Extraction**: Clean and extract structured text from HTML files (clean-and-strip.py).
-- **Format Conversion**: Convert between YAML and JSON formats (yaml-to-json.py).
-- **PDF Generation**: Merge multiple document types into a single PDF (merge-docs-into-pdf.py).
+- **Content Extraction**: Clean and extract structured text from HTML files (clean_and_strip.py).
+- **Format Conversion**: Convert between YAML and JSON formats (yaml_to_json.py).
+- **PDF Generation**: Merge multiple document types into a single PDF (merge_docs_into_pdf.py).
 
 For detailed documentation on all features, see the [documentation folder](/docs/).
 
@@ -129,19 +129,19 @@ The script clean_and_script.py is a cli program which takes a directory of html 
 
 Usage is as follows:
 ```bash
-clean-and-strip -input_dir input_directory_of_crawled_files  -output_dir output_directory_of_extracted_text
+clean_and_strip -input_dir input_directory_of_crawled_files  -output_dir output_directory_of_extracted_text
 ```
 
-## YAML-to-json.py
-Also included is yaml-to-json.py which can take a directory of yaml files and convert to json.  Can be used with clean_and_strip.py above
+## yaml_to_json.py
+Also included is yaml_to_json.py which can take a directory of yaml files and convert to json.  Can be used with clean_and_strip.py above
 
 ```bash 
-yaml-to-json.py -input_dir input_directory_of_crawled_files  -output_dir output_directory_of_extracted_text
+yaml_to_json.py -input_dir input_directory_of_crawled_files  -output_dir output_directory_of_extracted_text
 ```
 
 ## Document Merging Tool (Create PDFs)
 
-The `merge-docs-into-pdf.py` script allows you to combine multiple documents of different formats into a single PDF file. This tool supports the following file formats:
+The `merge_docs_into_pdf.py` script allows you to combine multiple documents of different formats into a single PDF file. This tool supports the following file formats:
 - HTML (.html)
 - Markdown (.md) 
 - Text (.txt)
@@ -167,7 +167,7 @@ pip install -r requirments.txt
 Run the script using the following command:
 
 ```bash
-python merge-docs-into-pdf.py -d <directory> -o <output.pdf> [--no-merge]
+python merge_docs_into_pdf.py -d <directory> -o <output.pdf> [--no-merge]
 ```
 
 Arguments:
@@ -179,12 +179,12 @@ Arguments:
 
 Merge all files into a single PDF:
 ```bash
-python merge-docs-into-pdf.py -d docs/ -o combined_documentation.pdf
+python merge_docs_into_pdf.py -d docs/ -o combined_documentation.pdf
 ```
 
 Create separate PDFs for each file:
 ```bash
-python merge-docs-into-pdf.py -d docs/ -o separate_pdfs/ --no-merge
+python merge_docs_into_pdf.py -d docs/ -o separate_pdfs/ --no-merge
 ```
 
 This will:

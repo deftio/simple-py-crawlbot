@@ -58,7 +58,7 @@ This command:
 ### Extract Clean Content from HTML Files
 
 ```bash
-python clean-and-strip.py -input_dir output -output_dir yaml_content
+python clean_and_strip.py -input_dir output -output_dir yaml_content
 ```
 
 This processes all HTML files in the 'output' directory and creates YAML files with clean, structured content in the 'yaml_content' directory.
@@ -66,17 +66,15 @@ This processes all HTML files in the 'output' directory and creates YAML files w
 ### Convert YAML to JSON
 
 ```bash
-python yaml-to-json.py yaml_content json_content
+python yaml_to_json.py yaml_content json_content
 ```
 
 This converts all YAML files in 'yaml_content' to JSON format and saves them in 'json_content'.
 
-## Creating Documentation
-
-### Generate a PDF from Processed Files
+### Generate PDF
 
 ```bash
-python merge-docs-into-pdf.py -d json_content -o documentation.pdf
+python merge_docs_into_pdf.py -d json_content -o documentation.pdf
 ```
 
 This combines all files in 'json_content' into a single PDF named 'documentation.pdf'.
@@ -92,14 +90,14 @@ mkdir -p raw_html clean_yaml json_data
 # Step 1: Crawl the website
 python crawler.py --url https://example.com --output_dir raw_html --progress --clean
 
-# Step 2: Process HTML to structured YAML
-python clean-and-strip.py -input_dir raw_html -output_dir clean_yaml
+# Step 2: Clean HTML content
+python clean_and_strip.py -input_dir raw_html -output_dir clean_yaml
 
-# Step 3: Convert to JSON format
-python yaml-to-json.py clean_yaml json_data
+# Step 3: Convert to JSON
+python yaml_to_json.py clean_yaml json_data
 
-# Step 4: Generate comprehensive PDF
-python merge-docs-into-pdf.py -d json_data -o site_documentation.pdf
+# Step 4: Generate PDF
+python merge_docs_into_pdf.py -d json_data -o site_documentation.pdf
 ```
 
 ### Crawl Multiple Sites
@@ -115,12 +113,12 @@ python crawler.py --url https://site1.example.com --output_dir site1 --progress 
 python crawler.py --url https://site2.example.com --output_dir site2 --progress --clean
 
 # Process both sites
-python clean-and-strip.py -input_dir site1 -output_dir site1_yaml
-python clean-and-strip.py -input_dir site2 -output_dir site2_yaml
+python clean_and_strip.py -input_dir site1 -output_dir site1_yaml
+python clean_and_strip.py -input_dir site2 -output_dir site2_yaml
 
 # Generate separate PDFs
-python merge-docs-into-pdf.py -d site1_yaml -o site1_docs.pdf
-python merge-docs-into-pdf.py -d site2_yaml -o site2_docs.pdf
+python merge_docs_into_pdf.py -d site1_yaml -o site1_docs.pdf
+python merge_docs_into_pdf.py -d site2_yaml -o site2_docs.pdf
 ```
 
 ### Create Automated Documentation Script
@@ -146,9 +144,9 @@ mkdir -p $TEMP_DIR/html $TEMP_DIR/yaml $TEMP_DIR/json
 
 # Run the crawling and processing pipeline
 python crawler.py --url $URL --output_dir $TEMP_DIR/html --progress --clean
-python clean-and-strip.py -input_dir $TEMP_DIR/html -output_dir $TEMP_DIR/yaml
-python yaml-to-json.py $TEMP_DIR/yaml $TEMP_DIR/json
-python merge-docs-into-pdf.py -d $TEMP_DIR/json -o $PDF_NAME
+python clean_and_strip.py -input_dir $TEMP_DIR/html -output_dir $TEMP_DIR/yaml
+python yaml_to_json.py $TEMP_DIR/yaml $TEMP_DIR/json
+python merge_docs_into_pdf.py -d $TEMP_DIR/json -o $PDF_NAME
 
 # Clean up temporary directories
 rm -rf $TEMP_DIR

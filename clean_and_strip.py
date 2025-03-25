@@ -4,9 +4,43 @@
 
 import os
 import sys
+import logging
+from pathlib import Path
 import yaml
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Comment
 import argparse
+
+# Configure logging
+def setup_logging():
+    log_dir = Path("logs")
+    log_dir.mkdir(exist_ok=True)
+    
+    # Create a formatter
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # File handler for all logs
+    file_handler = logging.FileHandler(
+        log_dir / "clean_and_strip.log",
+        encoding='utf-8'
+    )
+    file_handler.setFormatter(formatter)
+    
+    # Console handler for INFO and above
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(file_handler)
+    root_logger.addHandler(console_handler)
+    
+    return root_logger
+
+# Initialize logging
+logger = setup_logging()
 
 def clean_html(html_content):
     """Remove script and style elements from HTML."""
@@ -71,18 +105,39 @@ def write_yaml(data, output_filepath):
 
 def process_html_files(input_dir, output_dir):
     """Process all HTML files in the specified directory, converting them to structured YAML files."""
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    for filename in os.listdir(input_dir):
-        if filename.endswith('.html'):
-            html_path = os.path.join(input_dir, filename)
-            output_path = os.path.join(output_dir, filename.replace('.html', '.yaml'))
-            html_content = read_html_file(html_path)
-            soup = clean_html(html_content)
-            text_tree = extract_text(soup)
-            if text_tree:
-                write_yaml(text_tree, output_path)
-                print(f"Processed {filename} to {output_path}")
+    try:
+        logger.info(f"Starting HTML processing from {input_dir} to {output_dir}")
+        
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        logger.info(f"Created output directory: {output_dir}")
+        
+        input_path = Path(input_dir)
+        html_files = list(input_path.glob("**/*.html"))
+        logger.info(f"Found {len(html_files)} HTML files to process")
+        
+        for html_file in html_files:
+            try:
+                logger.info(f"Processing file: {html_file}")
+                
+                html_path = html_file
+                output_path = os.path.join(output_dir, html_file.name)
+                html_content = read_html_file(html_path)
+                soup = clean_html(html_content)
+                text_tree = extract_text(soup)
+                if text_tree:
+                    write_yaml(text_tree, output_path)
+                    logger.info(f"Processed {html_file} to {output_path}")
+                
+            except Exception as e:
+                logger.error(f"Error processing file {html_file}: {str(e)}")
+                continue
+        
+        logger.info("HTML processing completed")
+        
+    except Exception as e:
+        logger.error(f"Error in process_html_files: {str(e)}")
+        raise
 
 def main():
     parser = argparse.ArgumentParser(description="Convert HTML files to structured YAML preserving cleaned text.")

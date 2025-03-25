@@ -75,7 +75,7 @@ A browser-based GUI for the crawler with the same functionality.
 
 3. Fill in the form with the same options as the command-line version
 
-### 3. HTML Cleaner (clean-and-strip.py)
+### 3. HTML Cleaner (clean_and_strip.py)
 
 Extracts and cleans text content from HTML files, preserving document structure.
 
@@ -89,10 +89,10 @@ Extracts and cleans text content from HTML files, preserving document structure.
 #### Example Usage
 
 ```bash
-python clean-and-strip.py -input_dir output -output_dir yaml_output
+python clean_and_strip.py -input_dir output -output_dir yaml_output
 ```
 
-### 4. YAML to JSON Converter (yaml-to-json.py)
+### 4. YAML to JSON Converter (yaml_to_json.py)
 
 Converts YAML files to JSON format.
 
@@ -106,10 +106,10 @@ Converts YAML files to JSON format.
 #### Example Usage
 
 ```bash
-python yaml-to-json.py yaml_output json_output
+python yaml_to_json.py yaml_output json_output
 ```
 
-### 5. PDF Generator (merge-docs-into-pdf.py)
+### 5. PDF Generator (merge_docs_into_pdf.py)
 
 Combines various document formats into a single PDF.
 
@@ -123,7 +123,7 @@ Combines various document formats into a single PDF.
 #### Example Usage
 
 ```bash
-python merge-docs-into-pdf.py -d json_output -o documentation.pdf
+python merge_docs_into_pdf.py -d json_output -o documentation.pdf
 ```
 
 ## Complete Workflow Example
@@ -135,13 +135,13 @@ This example demonstrates a full workflow from crawling a website to generating 
 python crawler.py --url https://example.com --output_dir raw_html --progress --clean
 
 # Step 2: Clean and extract structured content
-python clean-and-strip.py -input_dir raw_html -output_dir clean_yaml
+python clean_and_strip.py -input_dir raw_html -output_dir clean_yaml
 
 # Step 3: Convert to JSON if needed
-python yaml-to-json.py clean_yaml json_data
+python yaml_to_json.py clean_yaml json_data
 
 # Step 4: Generate a comprehensive PDF
-python merge-docs-into-pdf.py -d json_data -o example_documentation.pdf
+python merge_docs_into_pdf.py -d json_data -o example_documentation.pdf
 ```
 
 ## Tips and Troubleshooting

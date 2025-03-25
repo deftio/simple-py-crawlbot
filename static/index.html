@@ -390,6 +390,7 @@
         <div class="tab-buttons">
             <button class="tab-button active" onclick="showTab('crawl-form')">New Crawl</button>
             <button class="tab-button" onclick="showTab('crawl-history')">Crawl History</button>
+            <button class="tab-button" onclick="showTab('output-viewer')">Output Viewer</button>
         </div>
         
         <div id="crawl-form" class="tab-content active">
@@ -413,28 +414,39 @@
             <div class="tab-content" id="myTabContent">
                 <!-- Crawler Tab -->
                 <div class="tab-pane fade show active" id="crawl" role="tabpanel">
-                    <form id="crawlForm">
+                    <form id="crawlForm" onsubmit="submitCrawlForm(event)">
                         <div class="form-group">
-                            <label for="urlInput">Starting URL</label>
-                            <input type="text" class="form-control" id="urlInput" name="url" placeholder="Enter starting URL" required>
+                            <label for="url">Starting URL</label>
+                            <input type="url" class="form-control" id="url" name="url" 
+                                placeholder="https://github.com/deftio/simple-py-crawlbot" 
+                                value="https://github.com/deftio/simple-py-crawlbot"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="output_dir">Output Directory</label>
+                            <input type="text" class="form-control" id="output_dir" name="output_dir" 
+                                placeholder="output" 
+                                value="output"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="max_links">Maximum Links to Crawl (optional)</label>
+                            <input type="number" class="form-control" id="max_links" name="max_links" 
+                                placeholder="Leave empty for unlimited" 
+                                value="10"
+                                min="1">
+                            <small class="form-text text-muted">Limit the number of pages to crawl. Leave empty for unlimited.</small>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="showProgress" name="show_progress">
-                            <label class="form-check-label" for="showProgress">Show Progress</label>
+                            <input type="checkbox" class="form-check-input" id="show_progress" name="show_progress" checked>
+                            <label class="form-check-label" for="show_progress">Show Progress</label>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="cleanContent" name="clean_content" checked>
-                            <label class="form-check-label" for="cleanContent">Clean Content</label>
+                            <input type="checkbox" class="form-check-input" id="clean_content" name="clean_content" checked>
+                            <label class="form-check-label" for="clean_content">Clean HTML Content</label>
+                            <small class="form-text text-muted">Remove scripts, styles, and comments from the HTML.</small>
                         </div>
-                        <div class="form-group">
-                            <label for="outputDir">Output Directory</label>
-                            <input type="text" class="form-control" id="outputDir" name="output_dir" placeholder="Enter output directory">
-                        </div>
-                        <div class="form-group">
-                            <label for="maxLinks">Maximum Links (optional)</label>
-                            <input type="number" class="form-control" id="maxLinks" name="max_links" placeholder="Enter maximum links">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Start Crawling</button>
+                        <button type="submit" class="btn btn-primary mt-3">Start Crawling</button>
                     </form>
                 </div>
 
@@ -491,10 +503,28 @@
             <!-- Results Section -->
             <div id="results" class="mt-5"></div>
         </div>
-        
+
         <div id="crawl-history" class="tab-content">
-            <h2>Crawl History</h2>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Crawl History</h2>
+                <button class="btn btn-danger" onclick="clearCrawlHistory()">
+                    <i class="fas fa-trash"></i> Clear History
+                </button>
+            </div>
             <div id="crawl-jobs"></div>
+        </div>
+
+        <div id="output-viewer" class="tab-content">
+            <h2>Output Viewer</h2>
+            <div class="form-group">
+                <label for="outputDirSelect">Select Output Directory:</label>
+                <select id="outputDirSelect" onchange="loadOutputFiles()">
+                    <option value="">Select a directory...</option>
+                </select>
+            </div>
+            <div id="outputFiles" class="output-files">
+                <!-- Output files will be listed here -->
+            </div>
         </div>
     </div>
 
@@ -511,95 +541,130 @@
         });
 
         function showLoading(button) {
-            const originalText = button.text();
-            button.prop('disabled', true)
-                  .addClass('btn-processing')
-                  .html('<span class="loading-spinner"></span>' + 'Processing...');
-            return originalText;
+            button.prop('disabled', true);
+            button.html('<span class="loading-spinner"></span> Crawling...');
         }
 
-        function hideLoading(button, originalText) {
-            button.prop('disabled', false).text(originalText);
+        function hideLoading(button) {
+            button.prop('disabled', false);
+            button.html('Start Crawling');
         }
 
         function showError(message) {
             $('#results').html(`
-                <div class="alert alert-danger">
-                    <h3>Error</h3>
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">Error</h4>
                     <p>${message}</p>
                 </div>
             `);
         }
 
-        function showSuccess(message, data = null) {
-            let html = `
-                <div class="alert alert-success">
-                    <h3>Success</h3>
-                    <p>${message}</p>
-                </div>`;
-            
-            if (data && data.pages) {
-                html += `
-                <div class="card mt-4">
-                    <div class="card-header bg-light">
-                        <h4 class="mb-0">Crawled Pages (${data.total_links})</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>URL</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
-                
-                data.pages.forEach(page => {
-                    const fileName = page.file_path.split('/').pop();
-                    html += `
-                        <tr>
-                            <td>${page.title}</td>
-                            <td>
-                                <a href="${page.html_url}" target="_blank" class="text-primary">
-                                    <i class="fas fa-external-link-alt"></i> View Source
-                                </a>
-                            </td>
-                            <td>
-                                <a href="/api/download/${encodeURIComponent(page.file_path)}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-download"></i> Download
-                                </a>
-                            </td>
-                        </tr>`;
+        function showSuccess(data) {
+            const summary = `
+                <div class="alert alert-success" role="alert">
+                    <h4 class="alert-heading">Crawl Completed</h4>
+                    <p>Successfully crawled ${data.total_links} pages.</p>
+                    <p>Output saved to: ${data.output_directory}</p>
+                </div>
+                <div class="crawled-pages">
+                    <h5>Crawled Pages:</h5>
+                    <ul class="list-group">
+                        ${data.pages.map(page => `
+                            <li class="list-group-item">
+                                <h6>${page.title}</h6>
+                                <small class="text-muted">${page.html_url}</small>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+            $('#results').html(summary);
+        }
+
+        async function submitCrawlForm(event) {
+            event.preventDefault();
+            const button = $('#crawlForm button[type="submit"]');
+            const formData = {
+                url: $('#url').val(),
+                show_progress: $('#show_progress').is(':checked'),
+                clean_content: $('#clean_content').is(':checked'),
+                output_dir: $('#output_dir').val() || 'output',
+                max_links: $('#max_links').val() ? parseInt($('#max_links').val()) : null
+            };
+
+            showLoading(button);
+            try {
+                const response = await fetch('/api/crawl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
                 });
-                
-                html += `
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-footer text-muted">
-                        Output Directory: ${data.output_directory}
-                    </div>
-                </div>`;
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to start crawl');
+                }
+
+                // Show progress during crawling
+                if (formData.show_progress) {
+                    const progressDiv = document.createElement('div');
+                    progressDiv.className = 'alert alert-info mt-3';
+                    progressDiv.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">Crawling in Progress</h5>
+                                <p class="mb-0">Pages processed: <span id="crawlProgress">0</span></p>
+                            </div>
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    `;
+                    $('#results').prepend(progressDiv);
+
+                    // Poll for updates
+                    const pollInterval = setInterval(async () => {
+                        try {
+                            const response = await fetch('/api/crawls');
+                            const jobs = await response.json();
+                            const currentJob = jobs.find(job => job.start_url === formData.url && job.status === 'running');
+                            
+                            if (currentJob) {
+                                document.getElementById('crawlProgress').textContent = currentJob.total_pages;
+                            } else {
+                                clearInterval(pollInterval);
+                                progressDiv.remove();
+                                showSuccess(data);
+                            }
+                        } catch (error) {
+                            console.error('Error polling progress:', error);
+                            clearInterval(pollInterval);
+                            progressDiv.remove();
+                        }
+                    }, 1000);
+                } else {
+                    showSuccess(data);
+                }
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                hideLoading(button);
             }
-            
-            $('#results').html(html);
         }
 
         function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
+            $('.tab-content').removeClass('active');
+            $(`#${tabId}`).addClass('active');
+            $('.tab-button').removeClass('active');
+            $(`.tab-button[onclick="showTab('${tabId}')"]`).addClass('active');
             
-            document.getElementById(tabId).classList.add('active');
-            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
-            
+            // Load data when switching to crawl history or output viewer
             if (tabId === 'crawl-history') {
                 loadCrawlHistory();
+            } else if (tabId === 'output-viewer') {
+                loadOutputDirectories();
             }
         }
         
@@ -651,38 +716,6 @@
             }
         }
 
-        // Crawler Form
-        $('#crawlForm').submit(function(event) {
-            event.preventDefault();
-            const submitBtn = $(this).find('button[type="submit"]');
-            const originalText = showLoading(submitBtn);
-
-            const formData = {
-                url: $('#urlInput').val(),
-                show_progress: $('#showProgress').is(':checked'),
-                clean_content: $('#cleanContent').is(':checked'),
-                output_dir: $('#outputDir').val() || 'output',
-                max_links: $('#maxLinks').val() ? parseInt($('#maxLinks').val()) : null
-            };
-
-            $.ajax({
-                type: 'POST',
-                url: '/api/crawl',
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                success: function(response) {
-                    showSuccess(`Crawling completed! Total links: ${response.total_links}`, response);
-                    showTab('crawl-history');
-                },
-                error: function(xhr) {
-                    showError(xhr.responseJSON?.detail || 'An error occurred while crawling.');
-                },
-                complete: function() {
-                    hideLoading(submitBtn, originalText);
-                }
-            });
-        });
-
         // Clean HTML Form
         $('#cleanForm').submit(function(event) {
             event.preventDefault();
@@ -706,7 +739,7 @@
                     showError(xhr.responseJSON?.detail || 'An error occurred while cleaning HTML.');
                 },
                 complete: function() {
-                    hideLoading(submitBtn, originalText);
+                    hideLoading(submitBtn);
                 }
             });
         });
@@ -734,7 +767,7 @@
                     showError(xhr.responseJSON?.detail || 'An error occurred while converting files.');
                 },
                 complete: function() {
-                    hideLoading(submitBtn, originalText);
+                    hideLoading(submitBtn);
                 }
             });
         });
@@ -767,6 +800,108 @@
                 }
             });
         });
+
+        async function loadOutputDirectories() {
+            try {
+                const response = await fetch('/api/crawls');
+                const crawls = await response.json();
+                
+                const select = document.getElementById('outputDirSelect');
+                select.innerHTML = '<option value="">Select a directory...</option>';
+                
+                // Add unique output directories from completed crawls
+                const dirs = new Set();
+                crawls.forEach(crawl => {
+                    if (crawl.status === 'completed' && crawl.output_dir) {
+                        dirs.add(crawl.output_dir);
+                    }
+                });
+                
+                dirs.forEach(dir => {
+                    const option = document.createElement('option');
+                    option.value = dir;
+                    option.textContent = dir;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading output directories:', error);
+            }
+        }
+
+        async function loadOutputFiles() {
+            const dir = document.getElementById('outputDirSelect').value;
+            if (!dir) return;
+            
+            try {
+                const response = await fetch(`/api/files/${encodeURIComponent(dir)}`);
+                const data = await response.json();
+                
+                const filesDiv = document.getElementById('outputFiles');
+                filesDiv.innerHTML = '';
+                
+                data.files.forEach(file => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'output-file';
+                    fileDiv.innerHTML = `
+                        <a href="/api/download/${encodeURIComponent(dir + '/' + file)}" 
+                           class="file-link" target="_blank">
+                            ${file}
+                        </a>
+                    `;
+                    filesDiv.appendChild(fileDiv);
+                });
+            } catch (error) {
+                console.error('Error loading output files:', error);
+                document.getElementById('outputFiles').innerHTML = '<p class="error">Error loading output files</p>';
+            }
+        }
+
+        async function clearCrawlHistory() {
+            if (!confirm('Are you sure you want to clear all crawl history? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/crawls/clear', {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to clear crawl history');
+                }
+                
+                // Reload the crawl history
+                loadCrawlHistory();
+                
+                // Show success message
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success alert-dismissible fade show';
+                alert.innerHTML = `
+                    Crawl history cleared successfully
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                `;
+                document.getElementById('crawl-history').insertBefore(alert, document.getElementById('crawl-jobs'));
+                
+                // Auto-dismiss after 3 seconds
+                setTimeout(() => {
+                    alert.remove();
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error clearing crawl history:', error);
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger alert-dismissible fade show';
+                alert.innerHTML = `
+                    Error clearing crawl history: ${error.message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                `;
+                document.getElementById('crawl-history').insertBefore(alert, document.getElementById('crawl-jobs'));
+            }
+        }
     </script>
 </body>
 </html>
