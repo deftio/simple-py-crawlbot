@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  spycrawl:
+    build: .
+    ports:
+      - "8803:8803"
+    volumes:
+      - ./output:/app/output
+      - ./logs:/app/logs
+    environment:
+      - HOST=0.0.0.0
+    command: python spycrawl.py

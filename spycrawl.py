@@ -564,8 +564,16 @@ async def stop_crawl(session_id: str):
     )
 
 if __name__ == "__main__":
-    logger.info("Starting SPYCrawl server...")
-    print("Starting SPYCrawl server...")
-    print("Access the web interface at http://127.0.0.1:8803")
-    print("API documentation available at http://127.0.0.1:8803/docs")
-    uvicorn.run("spycrawl:app", host="127.0.0.1", port=8803, reload=True, reload_dirs=["static"]) 
+    # Get host from environment variable or use default
+    host = os.environ.get("HOST", "127.0.0.1")
+    port = int(os.environ.get("PORT", "8803"))
+    
+    logger.info(f"Starting SPYCrawl server on {host}:{port}...")
+    print(f"Starting SPYCrawl server on {host}:{port}...")
+    print(f"Access the web interface at http://{host}:{port}")
+    print(f"API documentation available at http://{host}:{port}/docs")
+    
+    # In Docker, we shouldn't use reload=True
+    reload_mode = os.environ.get("RELOAD", "True").lower() in ("true", "1", "t")
+    
+    uvicorn.run("spycrawl:app", host=host, port=port, reload=reload_mode, reload_dirs=["static"]) 

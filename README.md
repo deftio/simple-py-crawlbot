@@ -202,5 +202,122 @@ This will:
 - The script preserves the formatting of the original documents
 - When using --no-merge, the output filename becomes the directory name where individual PDFs are saved
 
+## Testing SPyCrawl API
+
+The repository includes a comprehensive test suite specifically for the `spycrawl.py` API endpoints. These tests are separate from other CLI tools in the repository.
+
+### Test Files
+
+- `test_spycrawl_api.py` - Contains all the test cases for SPyCrawl API endpoints
+- `run_spycrawl_tests.py` - Runner script with command-line options
+- `test_spycrawl_README.md` - Detailed documentation for the test suite
+
+### Setup and Running Tests
+
+1. Ensure all dependencies are installed:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Run the test suite:
+   ```bash
+   python run_spycrawl_tests.py
+   ```
+
+3. Control verbosity level (optional):
+   ```bash
+   # Quiet mode (only show errors)
+   python run_spycrawl_tests.py -v 0
+
+   # Normal mode (show test names and status)
+   python run_spycrawl_tests.py -v 1
+
+   # Verbose mode (show detailed output)
+   python run_spycrawl_tests.py -v 2
+   ```
+
+### What's Tested
+
+The test suite verifies all SPyCrawl API endpoints, including:
+- Basic routing (/ and /pages)
+- Web crawling functionality (/api/crawl)
+- Crawl session management (list, get, stop, clear)
+- HTML cleaning (/api/clean) 
+- YAML to JSON conversion (/api/convert)
+- PDF generation (/api/pdf)
+- File operations (list files, download file)
+
+The tests will automatically start and stop the SPyCrawl server in a separate process and create temporary test directories to avoid affecting your existing data.
+
+For more details about the tests, see `test_spycrawl_README.md`.
+
+## Docker Support
+
+SPyCrawl can be run in a Docker container, which eliminates the need to install dependencies locally and ensures consistent behavior across different environments.
+
+### Prerequisites
+
+- Docker and Docker Compose installed on your system
+  - [Install Docker](https://docs.docker.com/get-docker/)
+  - [Install Docker Compose](https://docs.docker.com/compose/install/)
+
+### Running SPyCrawl with Docker
+
+There are two ways to run SPyCrawl with Docker:
+
+#### Option 1: Using Docker Compose (Recommended)
+
+1. Build and start the container:
+   ```bash
+   docker-compose up
+   ```
+
+2. Access the web interface at http://localhost:8803
+
+3. To run in the background:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. To stop the container:
+   ```bash
+   docker-compose down
+   ```
+
+#### Option 2: Using Docker directly
+
+1. Build the Docker image:
+   ```bash
+   docker build -t spycrawl .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -p 8803:8803 -v $(pwd)/output:/app/output -v $(pwd)/logs:/app/logs spycrawl
+   ```
+
+3. Access the web interface at http://localhost:8803
+
+### Persistent Data
+
+The Docker configuration mounts two volume directories:
+- `./output`: Where crawled websites and generated files are stored
+- `./logs`: Where log files are stored
+
+This ensures that your data persists even when containers are stopped or removed.
+
+### Customizing Docker Settings
+
+You can modify the `docker-compose.yml` file to change:
+- Port mappings
+- Volume mounts
+- Environment variables
+
+For example, to change the port:
+```yaml
+ports:
+  - "8080:8803"  # Maps host port 8080 to container port 8803
+```
+
 ## LICENSE
 BSD-2
